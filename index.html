@@ -5,8 +5,23 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="css/style.css" rel="stylesheet">
+        <script src='https://api.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
+        <link href='https://api.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
     </head>
     <body>
-    
+         <div id='map' style='width: 400px; height: 300px;'></div>
+         <div class='sidebar pad2'>Listing</div>
+         <div id='map' class='map pad2'>Map</div>
+            <script>
+            mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VlYnJvd240MyIsImEiOiJjajUzNHBhZ3owbG1wMzNwMWVncHMzZnFtIn0.hRR7R-bkM8fK9tTwJCNz6w';
+            var map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/traffic-day-v2',
+                center: [-77.034084, 38.909671],
+                zoom: 14
+            });
+            </script>
+         
+
     </body>
 </html>
