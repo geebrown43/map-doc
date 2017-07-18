@@ -1,27 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title></title>
+        <title>Finishline Stores Locator</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="css/style.css" rel="stylesheet">
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
         <script src='https://api.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
         <link href='https://api.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
+        <style>
+            body {
+            color: #404040;
+            font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            }
+
+            * {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            }
+
+            h1 {
+            font-size: 22px;
+            margin: 0;
+            font-weight: 400;
+            line-height: 20px;
+            padding: 20px 2px;
+            }
+
+            a {
+            color: #404040;
+            text-decoration: none;
+            }
+
+            a:hover {
+            color: #101010;
+            }
+
+            .sidebar {
+            position: absolute;
+            width: 33.3333%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            border-right: 1px solid rgba(0, 0, 0, 0.25);
+            }
+
+            .pad2 {
+            padding: 20px;
+            }
+
+            .map {
+            position: absolute;
+            left: 33.3333%;
+            width: 66.6666%;
+            top: 0;
+            bottom: 0;
+            }
+
+            .heading {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            height: 60px;
+            line-height: 60px;
+            padding: 0 10px;
+            }
+
+            .listings {
+            height: 100%;
+            overflow: auto;
+            padding-bottom: 60px;
+            }
+
+            .listings .item {
+            display: block;
+            border-bottom: 1px solid #eee;
+            padding: 10px;
+            text-decoration: none;
+            }
+
+            .listings .item:last-child { border-bottom: none; }
+
+            .listings .item .title {
+            display: block;
+            color: #00853e;
+            font-weight: 700;
+            }
+
+            .listings .item .title small { font-weight: 400; }
+
+            .listings .item.active .title,
+            .listings .item .title:hover { color: #8cc63f; }
+
+            .listings .item.active {
+            background-color: #f8f8f8;
+            }
+
+            ::-webkit-scrollbar {
+            width: 3px;
+            height: 3px;
+            border-left: 0;
+            background: rgba(0, 0, 0, 0.1);
+            }
+
+            ::-webkit-scrollbar-track {
+            background: none;
+            }
+
+            ::-webkit-scrollbar-thumb {
+            background: #00853e;
+            border-radius: 0;
+            }
+
+            .clearfix { display: block; }
+
+            .clearfix::after {
+            content: '.';
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+            }
+        </style>
     </head>
     <body>
-         <div id='map' style='width: 400px; height: 300px;'></div>
-         <div class='sidebar pad2'>Listing</div>
-         <div id='map' class='map pad2'>Map</div>
-            <script>
-            mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VlYnJvd240MyIsImEiOiJjajUzNHBhZ3owbG1wMzNwMWVncHMzZnFtIn0.hRR7R-bkM8fK9tTwJCNz6w';
-            var map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/traffic-day-v2',
-                center: [-77.034084, 38.909671],
-                zoom: 14
-            });
-            </script>
-         
+       <div class="sidebar">
+           <div class="heading"><h1>My Favorite Shoe Store Locations</h1></div>
+           <div id="listings" class="listings"></div>
+       </div>
+       <div id="map" class="map pad2"></div>
+        <script>
+            mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VlYnJvd240MyIsImEiOiJjajU5MTIxYmowMzV4MnhxcDlpeGN5cHg5In0.Y1nYL-rtvgEwS3qV0YkMrQ';
+                var map = new mapboxgl.Map({
+                    container: 'map',
+                    center: [-104.890498, 39.699596],
+                    zoom: 9,
+                    style: 'mapbox://styles/mapbox/dark-v9'
+                    
+                });
 
+                var stores = {
+                    "type": "FeatureCollection",
+                        "features": [{
+                            "type": "Feature",
+                            "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -104.956739,
+                                39.717475
+                            ]
+                            },
+                            "properties": {
+                            "phoneFormatted": "(303) 333-4864",
+                            "phone": "3033334864",
+                            "address": "3000 East First Avenue 226",
+                            "city": "Denver",
+                            "country": "United States",
+                            "crossStreet": "at 1st and Bayaud",
+                            "postalCode": "80206",
+                            "state": "Colorado"
+                            }
+                        },
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -104.822960,
+                                39.708684
+                            ]
+                            },
+                            "properties": {
+                            "phoneFormatted": "(303) 344-1301",
+                            "phone": "3033441301",
+                            "address": "14200 East Alameda Ave, 1020",
+                            "city": "Aurora",
+                            "country": "United States",
+                            "crossStreet": "at I-225 and Alameda",
+                            "postalCode": "80012",
+                            "state": "Colorado"
+                            }
+                        },
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -104.89094,
+                                39.784417
+                            ]
+                            },
+                            "properties": {
+                            "phoneFormatted": "(303) 373-4155",
+                            "phone": "3033734155",
+                            "address": "8316 1640 E 49th Ave, 1640",
+                            "city": "Denver",
+                            "country": "United States",
+                            "crossStreet": "at I-70 and Central Park Blvd",
+                            "postalCode": "80238",
+                            "state": "Colorado"
+                            }
+                        },
+                        {
+                            "type": "Feature",
+                            "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                -104.877949,
+                                39.563280
+                            ]
+                            },
+                            "properties": {
+                            "phoneFormatted": "(303) 790-9447",
+                            "phone": "3037909447",
+                            "address": "8505 Park Meadows Center Dr, 2021",
+                            "city": "Littleton",
+                            "country": "United States",
+                            "crossStreet": "at I-25 and Country Line Rd",
+                            "postalCode": "80124",
+                            "state": "Colorado"
+                            }
+                        },
+                         
+                            
+          
+        ]
+      };
+                        map.on('load', function(e) {
+                            map.addLayer({
+                                id: 'locations',
+                                type: 'symbol',
+                               
+                                source: {
+                                type: 'geojson',
+                                data: stores
+                                },
+                                layout: {
+                                'icon-image': 'restaurant-15',
+                                'icon-allow-overlap': true,
+                                }
+                            });
+                            buildLocationList(stores);
+                            });
+
+                        function buildLocationList(data) {
+                        for (i = 0; i < data.features.length; i++) {
+                            var currentFeature = data.features[i];
+                            var prop = currentFeature.properties;
+                            var listings = document.getElementById('listings');
+                            var listing = listings.appendChild(document.createElement('div'));
+                            listing.className = 'item';
+                            listing.id = 'listing-' + i;
+                            var link = listing.appendChild(document.createElement('a'));
+                            link.href = '#';
+                            link.className = 'title';
+                            link.dataPosition = i;
+                            link.innerHTML = prop.address;
+
+                            var details = listing.appendChild(document.createElement('div'));
+                            details.innerHTML = prop.city;
+                            if (prop.phone) {
+                            details.innerHTML += ' &middot; ' + prop.phoneFormatted;
+                            }
+                        }
+                        }
+
+                
+        </script> 
+
+        
     </body>
 </html>
