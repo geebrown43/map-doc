@@ -7,10 +7,11 @@
         <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
         <script src='https://api.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.js'></script>
         <link href='https://api.mapbox.com/mapbox-gl-js/v0.38.0/mapbox-gl.css' rel='stylesheet' />
+        <link href="https://fonts.googleapis.com/css?family=Shadows+Into+Light" rel="stylesheet">
         <style>
             body {
             color: #404040;
-            font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+            font: 20px 'Shadows Into Light', cursive;
             margin: 0;
             padding: 0;
             -webkit-font-smoothing: antialiased;
@@ -23,7 +24,7 @@
             }
 
             h1 {
-            font-size: 22px;
+            font-size: 28px;
             margin: 0;
             font-weight: 400;
             line-height: 20px;
@@ -50,7 +51,7 @@
             }
 
             .pad2 {
-            padding: 20px;
+            padding: 5px;
             }
 
             .map {
@@ -86,14 +87,14 @@
 
             .listings .item .title {
             display: block;
-            color: #00853e;
+            color: darkred;
             font-weight: 700;
             }
 
             .listings .item .title small { font-weight: 400; }
 
             .listings .item.active .title,
-            .listings .item .title:hover { color: #8cc63f; }
+            .listings .item .title:hover { color: red; }
 
             .listings .item.active {
             background-color: #f8f8f8;
@@ -124,6 +125,55 @@
             clear: both;
             visibility: hidden;
             }
+
+            .mapboxgl-popup-close-button {
+            display: none;
+            }
+
+            .mapboxgl-popup-content {
+            font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+            padding: 0;
+            width: 180px;
+            }
+
+            .mapboxgl-popup-content-wrapper {
+            padding: 1%;
+            }
+
+            .mapboxgl-popup-content h3 {
+            background: #91c949;
+            color: #fff;
+            margin: 0;
+            display: block;
+            padding: 10px;
+            border-radius: 3px 3px 0 0;
+            font-weight: 700;
+            margin-top: -15px;
+            }
+
+            .mapboxgl-popup-content h4 {
+            margin: 0;
+            display: block;
+            padding: 10px;
+            font-weight: 400;
+            }
+
+            .mapboxgl-popup-content div {
+            padding: 10px;
+            }
+
+            .mapboxgl-container .leaflet-marker-icon {
+            cursor: pointer;
+            }
+
+            .mapboxgl-popup-anchor-top > .mapboxgl-popup-content {
+            margin-top: 15px;
+            }
+
+            .mapboxgl-popup-anchor-top > .mapboxgl-popup-tip {
+            border-bottom-color: #91c949;
+            }
+
         </style>
     </head>
     <body>
@@ -133,6 +183,15 @@
        </div>
        <div id="map" class="map pad2"></div>
         <script>
+            if (!('remove' in Element.prototype)) {
+            Element.prototype.remove = function() {
+                if (this.parentNode) {
+                this.parentNode.removeChild(this);
+                }
+            };
+            }    
+
+
             mapboxgl.accessToken = 'pk.eyJ1IjoiZ2VlYnJvd240MyIsImEiOiJjajU5MTIxYmowMzV4MnhxcDlpeGN5cHg5In0.Y1nYL-rtvgEwS3qV0YkMrQ';
                 var map = new mapboxgl.Map({
                     container: 'map',
@@ -246,6 +305,54 @@
                             buildLocationList(stores);
                             });
 
+                        map.on('click', function(e) {
+                        
+                        var features = map.queryRenderedFeatures(e.point, { layers: ['locations'] });
+                        if (features.length) {
+                            var clickedPoint = features[0];
+                            // 1. Fly to the point
+                            flyToStore(clickedPoint);
+                            // 2. Close all other popups and display popup for clicked store
+                            createPopUp(clickedPoint);
+                            // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+                            var activeItem = document.getElementsByClassName('active');
+                            if (activeItem[0]) {
+                            activeItem[0].classList.remove('active');
+                            }
+                            // Find the index of the store.features that corresponds to the clickedPoint that fired the event listener
+                            var selectedFeature = clickedPoint.properties.address;
+
+                            for (var i = 0; i < stores.features.length; i++) {
+                            if (stores.features[i].properties.address === selectedFeature) {
+                                selectedFeatureIndex = i;
+                            }
+                            }
+                            // Select the correct list item using the found index and add the active class
+                            var listing = document.getElementById('listing-' + selectedFeatureIndex);
+                            listing.classList.add('active');
+                        }
+                        });
+
+                        function flyToStore(currentFeature) {
+                        map.flyTo({
+                            center: currentFeature.geometry.coordinates,
+                            zoom: 15
+                        });
+                        }
+
+                        function createPopUp(currentFeature) {
+                        var popUps = document.getElementsByClassName('mapboxgl-popup');
+                        // Check if there is already a popup on the map and if so, remove it
+                        if (popUps[0]) popUps[0].remove();
+
+                        var popup = new mapboxgl.Popup({ closeOnClick: false })
+                            .setLngLat(currentFeature.geometry.coordinates)
+                            .setHTML('<h3>Finishline Shoes</h3>' +
+                            '<h4>' + currentFeature.properties.address + '</h4>')
+                            .addTo(map);
+                        }
+
+
                         function buildLocationList(data) {
                         for (i = 0; i < data.features.length; i++) {
                             var currentFeature = data.features[i];
@@ -265,6 +372,23 @@
                             if (prop.phone) {
                             details.innerHTML += ' &middot; ' + prop.phoneFormatted;
                             }
+
+                            link.addEventListener('click', function(e) {
+                            // Update the currentFeature to the store associated with the clicked link
+                            var clickedListing = data.features[this.dataPosition];
+                            // 1. Fly to the point associated with the clicked link
+                            flyToStore(clickedListing);
+                            // 2. Close all other popups and display popup for clicked store
+                            createPopUp(clickedListing);
+                            // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+                            var activeItem = document.getElementsByClassName('active');
+                            if (activeItem[0]) {
+                                activeItem[0].classList.remove('active');
+                            }
+                            this.parentNode.classList.add('active');
+                            });
+
+
                         }
                         }
 
